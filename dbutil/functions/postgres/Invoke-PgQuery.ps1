@@ -1,7 +1,7 @@
 function Invoke-PgQuery {
 <#
-.TODO
-    Handle no-resultset commands
+.DESCRIPTION
+    Sends a text string to a postgres database and tries to return a dataset
 #>
     [CmdletBinding()]
     param (
@@ -38,7 +38,13 @@ function Invoke-PgQuery {
     $conn.close()
     $conn.Dispose()
 
-    $ds.Tables[0].Rows[0].Table[0]
+    try{
+        $ds.Tables[0].Rows[0].Table[0]
+    }
+    catch{
+        Write-Warning "No resultset returned for command string."
+        Write-Warning $Query
+    }
     $da.Dispose()
     $ds.Dispose()
 }
