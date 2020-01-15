@@ -5,6 +5,10 @@ function Format-SqlIdentifier {
     ¿Warn if the input srting appears already quoted?
     Error if the input string is not quoteable (null or empty)
 
+    Note, emoji are valid unquoted identifiers in postgres & mysql.
+    The intent of this function is not eliminate _all_ extraneous quoting,
+    rather to unquote most common identifiers. False positives are okay.
+
 .PARAMETER QuoteStyle
     Accepts single-char or double-char input or "friendly wording" by 
     description of syntax style or platform name. If platform name is 
@@ -33,12 +37,22 @@ function Format-SqlIdentifier {
     )
 
     begin{
-        $syntaxCode = switch ($QuoteStyle) {
+        $syntaxCode = switch($QuoteStyle) {
             {$_ -in ( '"',     '""', 'DoubleQuote',   'PostgreSQL','pg' ) } { 1 }
             {$_ -in ( "'",     "''", 'SingleQuote'                      ) } { 2 }
             {$_ -in ( '`',     '``', 'BackTick',      'MySql' )           } { 3 }
             {$_ -in ( '[',']', '[]', 'SquareBracket', 'SqlServer','ms' )  } { 4 }
             Default { $QuoteStyle }
+        }
+
+        # TODO: Get-SqlKeywords for styles 2,3,4
+        # MSSQL (4) see - https://gist.github.com/petervandivier/1b6d87de4af6b4cd5150e107d22d4eb2#gistcomment-3110666
+        $keywords = switch($syntaxCode) {
+                1 {Get-PgKeyword}
+                # 2 {}
+                # 3 {}
+                # 4 {}
+                default {$null}
         }
 
         function Add-Quote {
@@ -55,7 +69,6 @@ function Format-SqlIdentifier {
     }
     
     process{
-        # $keywords = Get-SqlKeyword $syntaxCode
         $addQuote = $false
 
         if($Word -in $keywords){$addQuote = $true}
@@ -63,6 +76,9 @@ function Format-SqlIdentifier {
         if($Word.Substring(0,1) -match '[0-9]'){$addQuote = $true}
 
         if($addQuote){
+            if(($syntaxCode -in (1,3)) -and ($Word -cmatch '[A-Z]')){
+                Write-Warning "Upper casing is preserved in quoted identifiers for PostgreSQL & MySQL. Inspect the output after execution."
+            }
             return Add-Quote $Word $syntaxCode
         } else {
             return $Word

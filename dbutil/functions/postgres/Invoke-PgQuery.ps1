@@ -1,4 +1,8 @@
 function Invoke-PgQuery {
+<#
+.TODO
+    Handle no-resultset commands
+#>
     [CmdletBinding()]
     param (
         [Parameter(Position=0)]
