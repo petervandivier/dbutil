@@ -47,7 +47,7 @@ function Invoke-PgQuery {
 
     # Pwd is stripped from the connection string at .conn() but is still sent in the clear
     # over the network unless via SSL. 
-    $BSTR = [system.runtime.interopservices.marshal]::SecureStringToBSTR($Password)
+    if($Password){$BSTR = [system.runtime.interopservices.marshal]::SecureStringToBSTR($Password)}
 
     $conn = New-Object System.Data.Odbc.OdbcConnection
     $conn.ConnectionString = @(
@@ -56,12 +56,14 @@ function Invoke-PgQuery {
         "Port=$Port;"
         "Database=$Database;"
         "Uid=$User;"
-        "Pwd=$([system.runtime.interopservices.marshal]::PtrToStringAuto($BSTR));"
+        if($Password){"Pwd=$([system.runtime.interopservices.marshal]::PtrToStringAuto($BSTR));"}
     ) -join ''
     $conn.Open()
 
-    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($BSTR) 
-    Remove-Variable Password,BSTR
+    if($Password){
+        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($BSTR) 
+        Remove-Variable Password,BSTR
+    }
 
     $cmd = New-Object System.Data.Odbc.OdbcCommand($Query,$conn)
     $ds = New-Object System.Data.DataSet
