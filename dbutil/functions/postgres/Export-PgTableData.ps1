@@ -71,6 +71,7 @@ function Export-PgTableData {
     $env:PGPASSWORD = $Password
 
     foreach($tbl in $DumpTables) {
+        Write-Verbose "Exporting $tbl"
         $CopyCmd = $CopyCmdTmp -f $tbl
         Invoke-Command {psql -d $Database -h $SqlConnection -p $Port -U $User -c $CopyCmd}
         $data = Import-Csv "$CsvPath/$tbl.csv"
