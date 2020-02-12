@@ -75,6 +75,10 @@ function Export-PgTableData {
         $CopyCmd = $CopyCmdTmp -f $tbl
         Invoke-Command {psql -d $Database -h $SqlConnection -p $Port -U $User -c $CopyCmd}
         $data = Import-Csv "$CsvPath/$tbl.csv"
-        Format-SqlValues -InputObject $data -Expanded -TableName $tbl | Set-Content "$SqlPath/$tbl.sql" -Force
+        if(0 -eq $data.count){
+            Remove-Item "$CsvPath/$tbl.csv"
+        }else{
+            Format-SqlValues -InputObject $data -Expanded -TableName $tbl | Set-Content "$SqlPath/$tbl.sql" -Force
+        }
     }
 }
