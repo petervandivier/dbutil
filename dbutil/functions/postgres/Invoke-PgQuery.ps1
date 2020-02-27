@@ -12,6 +12,8 @@ function Invoke-PgQuery {
     }
     Invoke-PgQuery @splat
 
+.TODO
+    Support parameterisation
 #>
     [CmdletBinding()]
     param (
@@ -78,8 +80,8 @@ function Invoke-PgQuery {
         $ds.Tables[0].Rows[0].Table[0]
     }
     catch{
-        Write-Warning "No resultset returned for command string."
-        Write-Warning $Query
+        Write-Verbose "No resultset returned for command string."
+        Write-Verbose $Query
     }
     $da.Dispose()
     $ds.Dispose()
