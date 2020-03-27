@@ -7,3 +7,4 @@ Get-ChildItem -Recurse -Path "./functions/*.ps1" | ForEach-Object {
 Pop-Location
 
 New-Alias -Name 'ipgq' -Value 'Invoke-PgQuery'
+New-Alias -Name 'rmpgdb' -Value 'Remove-PgDatabase'

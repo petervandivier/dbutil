@@ -5,7 +5,5 @@
     Author = 'Peter Vandivier'
     FunctionsToExport = '*'
     # Aliases are defined in dbutil.psm1
-    AliasesToExport = @(
-        'Invoke-PgQuery'
-    )
+    AliasesToExport = '*'
 }
