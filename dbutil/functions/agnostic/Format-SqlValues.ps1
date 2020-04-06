@@ -109,7 +109,23 @@ VALUES
     $DELIMITER = if($Expanded){",$LB_TAB"}else{","}
 
     foreach($column in $ColumnNames) {
-        $group = $InputObject.$column | Group-Object 
+        try{
+            $group = $InputObject.$column | Group-Object 
+        } catch {
+            $InputObject | ForEach-Object {
+                # lawd fuhgive this shitty hack
+                if(($_.$column[0].Item1 -is [IPAddress]) -or ($_.$column[0] -is [IPAddress])){
+                    $CidrArray = @()
+                    foreach($ip in $_.$column){
+                        $CidrArray += "$($ip.Item1)/$($ip.Item2)"
+                    }
+                    $_.$column = "{$($CidrArray -join ',')}"
+                }else{
+                    $_.$column = "{$($_.$column -join ',')}"
+                }
+            }
+            $group = $InputObject.$column | Group-Object 
+        }
     
         [int]$MaxLength = ($group.Name | Measure-Object -Maximum -Property Length).Maximum
         
