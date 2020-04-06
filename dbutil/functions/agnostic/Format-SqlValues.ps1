@@ -89,15 +89,18 @@ function Format-SqlValues {
 
     $ColumnNames = ($Columns.GetEnumerator() | Sort-Object { $_.Value.Order }).Name 
     $BATCH_HEADER = @"
-INSERT INTO {0} 
-{1}
+INSERT INTO {TableName} 
+{COLUMN_HEADER}
 VALUES
 
 "@
 
     if($TableName){
-        $BATCH_HEADER =  $BATCH_HEADER -f $TableName, '{0}'
+        $BATCH_HEADER = $BATCH_HEADER -replace '{TableName}', $TableName
     }
+    # else{
+    #     $BATCH_HEADER = $BATCH_HEADER -replace '{TableName}', '{0}'
+    # }
 
     $LB_TAB = "`n    "
     $LEAD = if($Expanded){"$LB_TAB"}else{""}
@@ -168,7 +171,7 @@ VALUES
         }
     }) -join $DELIMITER
     $COLUMN_HEADER = "($LEAD$COLUMN_HEADER$TAIL)"
-    $BATCH_HEADER = $BATCH_HEADER -f $COLUMN_HEADER
+    $BATCH_HEADER = $BATCH_HEADER -replace '{COLUMN_HEADER}', $COLUMN_HEADER
 
     $output = if($RowCount -eq 1){
         @(
